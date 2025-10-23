@@ -17,15 +17,18 @@ export async function addBeneficiary(prevState: any, formData: FormData) {
     return { error: 'Not authenticated' }
   }
 
-  // Get user's organization_id
-  const { data: userProfile } = await supabase
-    .from('users')
-    .select('organization_id')
-    .eq('id', user.id)
-    .single()
+  // Get user's organization_id using database function (bypasses RLS)
+  const { data: organizationId, error: orgError } = await supabase.rpc(
+    'get_current_user_org_id'
+  )
 
-  if (!userProfile?.organization_id) {
-    return { error: 'Organization not found' }
+  if (orgError) {
+    console.error('Error fetching organization:', orgError)
+    return { error: 'Failed to fetch organization. Please try again.' }
+  }
+
+  if (!organizationId) {
+    return { error: 'Organization not found. Please make sure your profile is set up correctly.' }
   }
 
   // Get form data
@@ -43,7 +46,7 @@ export async function addBeneficiary(prevState: any, formData: FormData) {
   const { error } = await supabase
     .from('beneficiaries')
     .insert({
-      organization_id: userProfile.organization_id,
+      organization_id: organizationId,
       name,
       program_type: programType,
       enrolled_date: enrolledDate,
