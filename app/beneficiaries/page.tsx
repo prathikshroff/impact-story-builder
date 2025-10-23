@@ -13,10 +13,8 @@ export default async function BeneficiariesPage() {
     const { data: { user } } = await supabase.auth.getUser()
     
     if (user) {
-      const { data, error } = await supabase
-        .from('beneficiaries')
-        .select('*')
-        .order('created_at', { ascending: false })
+      // Use RPC function to bypass RLS
+      const { data, error } = await supabase.rpc('get_beneficiaries')
       
       if (error) {
         console.error('Error fetching beneficiaries:', error)
