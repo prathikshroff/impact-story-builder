@@ -40,7 +40,7 @@ BEGIN
         p_name,
         p_program_type,
         p_enrolled_date,
-        p_status
+        p_status::beneficiary_status
     )
     RETURNING id INTO v_beneficiary_id;
     
