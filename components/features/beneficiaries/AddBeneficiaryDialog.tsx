@@ -1,6 +1,7 @@
 'use client'
 
-import { useState, useActionState } from 'react'
+import { useState, useActionState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -24,13 +25,17 @@ import { addBeneficiary } from '@/app/beneficiaries/actions'
 import { Plus } from 'lucide-react'
 
 export function AddBeneficiaryDialog() {
+  const router = useRouter()
   const [open, setOpen] = useState(false)
   const [state, formAction, isPending] = useActionState(addBeneficiary, null)
 
-  // Close dialog on success
-  if (state?.success && open) {
-    setOpen(false)
-  }
+  // Close dialog and refresh on success
+  useEffect(() => {
+    if (state?.success && open) {
+      setOpen(false)
+      router.refresh()
+    }
+  }, [state?.success, open, router])
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
